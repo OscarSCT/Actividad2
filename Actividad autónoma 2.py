@@ -41,4 +41,8 @@ texto.write('Puntaje:0     Máximo puntaje: 0', align='center', font=('Courier',
 
 #Cuerpo de la serpiende
 cuerpo = []                             #Una lista que almacena cada segmento
+
 colores = [(109,160,104),(104,142,160)]
+
+                                        #Bibliografía librería
+                                        #https://docs.python.org/es/3.13/library/turtle.html
