@@ -44,5 +44,124 @@ cuerpo = []                             #Una lista que almacena cada segmento
 colores = [(109,160,104),(104,142,160)]
 
 
-                                        #bibliografía librería Turtle
-                                        #https://docs.python.org/es/3.13/library/turtle.html
+#Funciones
+
+def printText():
+
+    global  maxPuntaje
+    if puntaje>maxPuntaje:
+        maxPuntaje = puntaje
+    texto.clear()
+    texto.write(f'Puntaje:{puntaje}     Máximo puntaje: {maxPuntaje}', align='center', font=('Courier', 20, 'normal'))
+
+#Definir cada movimiento
+def arriba():
+    cabeza.direction = 'up'
+def abajo():
+    cabeza.direction = 'down'
+def izquierda():
+    cabeza.direction = 'left'
+def derecha():
+    cabeza.direction = 'right'
+
+#Ejecuta el movimiento
+def movimiento():
+    if cabeza.direction == 'up':        #Define movimientos de la serpiente
+        y =  cabeza.ycor()              #Obtiene la coordena Y
+        cabeza.sety(y + 20)             #Actualiza la posición Y
+
+    elif cabeza.direction == 'down':
+        y =  cabeza.ycor()              #Obtiene la coordena Y
+        cabeza.sety(y - 20)
+
+    elif cabeza.direction == 'left':
+        x =  cabeza.xcor()              #Obtiene la coordena X
+        cabeza.setx(x - 20)
+
+    elif cabeza.direction == 'right':
+        x =  cabeza.xcor()              #Obtiene la coordena X
+        cabeza.setx(x + 20)
+
+#Creacion del cuerpo
+def crearSegmento():
+    global puntaje
+    segmento = turtle.Turtle()
+    turtle.colormode(255)
+    segmento.speed(0)
+    segmento.shape('square')
+    segmento.color(random.choice(colores))
+    segmento.penup()
+    cuerpo.append(segmento)
+    puntaje += 1
+    printText()
+
+#Colisión con la comida
+def colisionComida():
+    if cabeza.distance(comida)<20:      #Distancia entre la cabeza y la fruta
+        x = random.randint(-280,280)
+        y = random.randint(-280, 280)
+        comida.goto(x,y)                #Se actualiza la posición de la fruta al momento de atraparla
+        crearSegmento()
+
+#Mover el cuerpo
+def movCuerpo():
+    totalSeg = len(cuerpo)
+
+    #Movimiento continuo
+    #La cabeza de la serpiente es la excepción
+    for segmento in range(totalSeg-1,0,-1):     #Desde el ultimo segmento hasta el primero
+        x = cuerpo[segmento-1].xcor()           #Detecta las coordenadas del elemento anterior
+        y = cuerpo[segmento-1].ycor()
+        cuerpo[segmento].goto(x,y)              #Se dirige a la posición del elemento anterior
+
+    if totalSeg >0:                             #Debe haber almenos un elemento para que este siga a la cabeza
+        x = cabeza.xcor()
+        y = cabeza.ycor()
+        cuerpo[0].goto(x,y)
+
+#Colisión con el borde
+def borde():
+
+    global  puntaje
+    if cabeza.xcor()<-280 or cabeza.xcor()>280 or cabeza.ycor()<-280 or cabeza.ycor()>280:
+        time.sleep(0.5)
+        cabeza.goto(0,0)
+        cabeza.direction = 'stop'
+        for segmento in cuerpo:         #Esconde los segmentos
+            segmento.goto(1000,1000)
+        cuerpo.clear()                  #Limpia la lista
+        puntaje = 0
+        printText()
+
+def mordida():
+
+    global puntaje
+    for segmento in cuerpo:
+        if cabeza.distance(segmento) < 20:
+            time.sleep(0.5)
+            cabeza.goto(0, 0)
+            cabeza.direction = 'stop'
+            for segmento in cuerpo:  # Esconde los segmentos
+                segmento.goto(1000, 1000)
+            cuerpo.clear()  # Limpia la lista
+            puntaje = 0
+            printText()
+
+#Conexion con teclado
+window.listen()                         #Se detecta cuando se presiona una tecla
+window.onkeypress(arriba,'Up')          #Ejecuta la función arriba() cuando detecta up
+window.onkeypress(abajo,'Down')
+window.onkeypress(izquierda,'Left')
+window.onkeypress(derecha,'Right')
+
+#Ciclo permanente
+while True:
+    window.update()                     #Actualizar la pantalla
+
+    borde()
+    colisionComida()                    #Funcion que se ejecuta cuando toca la comida
+    mordida()
+    movCuerpo()                         #Agrega movimiento al cuerpo
+    movimiento()                        #Hace el respectivo movimiento con las teclas
+
+    time.sleep(posponer)                #Hace que se posponga por el tiempo establecido
